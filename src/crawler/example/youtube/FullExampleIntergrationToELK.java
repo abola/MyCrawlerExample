@@ -18,9 +18,10 @@ public class FullExampleIntergrationToELK {
 
     static String elasticHost = "localhost" ;
     static String elasticPort = "9200" ;
-    static String elasticIndex = "youtube-"; // 全小寫字母
+    static String elasticIndex = "youtube-"; // 請在後方加入帳號(ex: youtube-abola)，務必全小寫字母
     static String elasticIndexType = "data"; // 範例請不要改這行
 
+    // 設定使用者ID或頻道ID任一
     String username = "kos44444";
     String channelId = "";
     String api_key = "AIzaSyCE3rhrAg9_Nuxr1i-lfwTnbZ48ECkc-9c";
@@ -47,6 +48,7 @@ public class FullExampleIntergrationToELK {
         getVideoStatistics( videoTable.rowKeySet() );
 
 
+        // 將資料寫入 Elasticsearch
         for(String row: videoTable.rowKeySet()){
             String elasticJson = new JSONObject(videoTable.row(row)).toString();
             sendPost("http://" + elasticHost + ":" + elasticPort
