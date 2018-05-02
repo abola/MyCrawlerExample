@@ -22,7 +22,7 @@ public class FullExampleIntergrationToELK {
     static String elasticIndexType = "data"; // 範例請不要改這行
 
     // 設定使用者ID或頻道ID任一
-    String username = "kos44444";
+    String username = "e84768131";
     String channelId = "";
     String api_key = "AIzaSyCE3rhrAg9_Nuxr1i-lfwTnbZ48ECkc-9c";
 
@@ -112,7 +112,7 @@ public class FullExampleIntergrationToELK {
         }
 
         String uri = "https://www.googleapis.com/youtube/v3/search?channelId="+channelId+
-                "&fields=items(id(videoId),snippet(title)),nextPageToken" +
+                "&fields=items(id(videoId),snippet(title,channelTitle)),nextPageToken" +
                 "&part=snippet&order=date&maxResults=50&key="+api_key;
 
         // 如果有指定換頁指標
@@ -132,12 +132,14 @@ public class FullExampleIntergrationToELK {
         for (Element elem : results.select("items")) {
             String videoId = elem.select("id").text();
             String title = elem.select("title").text();
+            String channelTitle = elem.select("channelTitle").text();
 
             // 空ID資料不處理
             if ("".equals(videoId)) continue;
 
             videoTable.put(videoId, "videoid", videoId);
             videoTable.put(videoId, "title", title);
+            videoTable.put(videoId, "channelTitle", channelTitle);
 
         }
 
