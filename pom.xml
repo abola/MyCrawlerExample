@@ -26,8 +26,8 @@
           <configuration>
             <programs>
               <program>
-                <mainClass>crawler.example.past.FBElasticImport</mainClass>
-                <id>fbElasticImport</id>
+                <mainClass>crawler.example.youtube.FullExampleIntergrationToELK</mainClass>
+                <id>youtubeToElk</id>
               </program>
               <program>
                   <mainClass>crawler.example.integration.PM25ElasticImport</mainClass>
