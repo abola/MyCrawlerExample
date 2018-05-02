@@ -1,9 +1,12 @@
 package crawler.example.youtube;
 
 import com.github.abola.crawler.CrawlerPack;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.mashape.unirest.http.Unirest;
 import org.apache.commons.logging.impl.SimpleLog;
+import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 
 import java.util.*;
@@ -13,30 +16,43 @@ import java.util.*;
  */
 public class FullExampleIntergrationToELK {
 
+    static String elasticHost = "localhost" ;
+    static String elasticPort = "9200" ;
+    static String elasticIndex = "youtube-"; // 全小寫字母
+    static String elasticIndexType = "data"; // 範例請不要改這行
+
     String username = "kos44444";
     String channelId = "";
     String api_key = "AIzaSyCE3rhrAg9_Nuxr1i-lfwTnbZ48ECkc-9c";
 
+    // 使用 Guava 物件 Table 資料會像以下
+    // | row | column | value|
+    // |-----|--------|------|
+    // | id  | item1  | aaa  |
+    // | id  | item2  | bbb  |
+    // | id  | item3  | ccc  |
+    Table<String, String, String> videoTable;
 
 
     public FullExampleIntergrationToELK() throws Exception{
         // 確認要查詢 channels 清單
         List<String> channels = getChannels();
 
-        // 使用 Guava 物件 Table 資料會像以下
-        // | row | column | value|
-        // |-----|--------|------|
-        // | id  | item1  | aaa  |
-        // | id  | item2  | bbb  |
-        // | id  | item3  | ccc  |
-        Table<String, String, String> videos = null;
         // 讀取 channels 的 videos
-        for(String ch: channels ){
-            videos = getVideos(ch);
+        for(String channelId: channels ){
+            getVideos(channelId);
         }
 
-        // 取得
+        // 更新每一個影片的統計資料
+        getVideoStatistics( videoTable.rowKeySet() );
 
+
+        for(String row: videoTable.rowKeySet()){
+            String elasticJson = new JSONObject(videoTable.row(row)).toString();
+            sendPost("http://" + elasticHost + ":" + elasticPort
+                            + "/" + elasticIndex + "/" + elasticIndexType
+                    , elasticJson);
+        }
     }
 
 
@@ -72,11 +88,21 @@ public class FullExampleIntergrationToELK {
         return channels;
     }
 
-    public Table<String, String, String> getVideos(String channelId){
-        return getVideos(channelId, "", null);
+    /**
+     * 取得指定CHANNEL的影片清單
+     * @param channelId
+     * @return
+     */
+    public void getVideos(String channelId){
+        getVideos(channelId, "");
     }
 
-    public Table<String, String, String> getVideos(String channelId, String pageToken, Table<String, String, String> videoTable){
+    /**
+     * 取得指定CHANNEL的影片清單
+     * @param channelId
+     * @return
+     */
+    public void getVideos(String channelId, String pageToken){
 
         // 首次進入建立TABLE物件
         if (null == videoTable) {
@@ -98,7 +124,7 @@ public class FullExampleIntergrationToELK {
             results = CrawlerPack.start().getFromJson(uri);
         }
         catch(java.lang.IndexOutOfBoundsException outBounds){
-            return videoTable;
+            return ;
         }
 
         for (Element elem : results.select("items")) {
@@ -117,10 +143,70 @@ public class FullExampleIntergrationToELK {
         String nextPageToken = results.select("nextPageToken").text();
         if ( !"".equals(nextPageToken) ){
             // return
-            return getVideos(channelId, nextPageToken, videoTable);
+            getVideos(channelId, nextPageToken);
         }
+    }
 
-        return videoTable;
+    /**
+     * 查詢每一部影片的統計資料，50筆資料送一次REQUEST，加速處理
+     *
+     * @param videos
+     */
+    public void getVideoStatistics(Set<String> videos){
+        int idsLimitCounter = 50;
+        List<String> ids = new ArrayList<>();
+        // 取得 video 的統計資訊
+        for(String videoId: videos){
+            ids.add(videoId);
+            // 計數，累計至最大值才執行
+            idsLimitCounter--;
+            if ( 0 >= idsLimitCounter ){
+                // reset counter
+                idsLimitCounter = 50;
+                // Guava 指令：將集合物件使用指定的符號合併成一個字串
+                getVideoStatistics( Joiner.on(",").join(ids) );
+                ids = new ArrayList<>();
+            }
+        }
+        if (0 < ids.size()) getVideoStatistics( Joiner.on(",").join(ids) );
+    }
+
+    /**
+     * 查詢指定ID(s)的統計資料，並回填至 TABLE
+     * @param ids
+     */
+    public void getVideoStatistics(String ids){
+        System.out.println(ids);
+        String uri = "https://www.googleapis.com/youtube/v3/videos?id="+ids+
+                "&part=snippet,statistics&fields=items(id,snippet(publishedAt),statistics)"+
+                "&key="+api_key;
+
+        for (Element elem : CrawlerPack.start().getFromJson(uri).select("items")) {
+            String videoId = elem.select("id").text();
+            String publishedAt = elem.select("publishedAt").text();
+            String viewCount = elem.select("viewCount").text();
+            String likeCount = elem.select("likeCount").text();
+            String dislikeCount = elem.select("dislikeCount").text();
+            String commentCount = elem.select("commentCount").text();
+
+            videoTable.put(videoId, "publishedAt", publishedAt);
+            videoTable.put(videoId, "viewCount", viewCount);
+            videoTable.put(videoId, "likeCount", likeCount);
+            videoTable.put(videoId, "dislikeCount", dislikeCount);
+            videoTable.put(videoId, "commentCount", commentCount);
+        }
+    }
+
+
+    String sendPost(String url, String body){
+        try{
+            return Unirest.post(url)
+                    .header("content-type", "text/plain")
+                    .header("cache-control", "no-cache")
+                    .body(body)
+                    .asString().getBody();
+
+        }catch(Exception e){return "Error:" + e.getMessage();}
     }
 
 

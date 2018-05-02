@@ -1,0 +1,28 @@
+{
+  "template": "youtube*",
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "data": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "viewCount": {
+          "type": "integer"
+        },
+        "likeCount": {
+          "type": "integer"
+        },
+        "dislikeCount": {
+          "type": "integer"
+        },
+        "commentCount": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
