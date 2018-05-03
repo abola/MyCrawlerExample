@@ -17,11 +17,15 @@ import org.jsoup.nodes.Element;
  */
 public class RealPrice {
 	public static void main(String[] args) {
-		
+
+		/*
 		String uri = "zip:http://plvr.land.moi.gov.tw"
 				+ "/Download?type=zip&fileName=lvr_landxml.zip"
 				+ "!/A_LVR_LAND_A.XML";
+		*/
 
+		String uri = "zip:http://plvr.land.moi.gov.tw/Download?type=zip&fileName=lvr_landxml.zip"
+				+ "!/B_LVR_LAND_A.XML";
 
 		Document jsoupDoc = CrawlerPack.start()
 				.getFromXml(uri);
