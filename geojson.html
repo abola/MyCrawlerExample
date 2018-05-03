@@ -28,14 +28,22 @@
         // Load GeoJSON.
         map.data.loadGeoJson(
         	// 可輸入資料網址 或直接 輸入 GeoJson
-        	"http://www.geologycloud.tw/data/zh-tw/liquefaction?area=%E8%87%BA%E5%8C%97&classify=%E9%AB%98%E6%BD%9B%E5%8B%A2&all=true"
-        	//"http://128.199.204.20/pm25/geojson.php"
+        	// 多邊形
+        	//"http://www.geologycloud.tw/data/zh-tw/liquefaction?area=%E8%87%BA%E5%8C%97&classify=%E9%AB%98%E6%BD%9B%E5%8B%A2&all=true"
+
+            // 線- (參考 GIS-T 的資料)
+            //
+
+        	// 點
+        	//"https://gist-geo.motc.gov.tw/Api/Locator/V1/LandmarkLocation/%E4%BA%A4%E9%80%9A%E9%83%A8/GeoJSON"
         );
-        
+
+        // 範例來源
+        // https://developers.google.com/maps/documentation/javascript/datalayer?hl=zh-tw#load_geojson
         
       }
     </script>
-<script src="https://maps.googleapis.com/maps/api/js?callback=initMap">
+<script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyCE3rhrAg9_Nuxr1i-lfwTnbZ48ECkc-9c">
 </script>
 </body>
 </html>
