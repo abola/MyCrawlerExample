@@ -1,3 +1,4 @@
+/*** 以下是 mac 抓出來的列表清單 ***/
                .TPE-Free AD WiFi 7a:8a:20:52:21:e9 -91  165     Y  -- NONE
                          iTaiwan 9a:8a:20:52:21:e9 -91  165     Y  -- NONE
                       adwifi-mrt 8a:8a:20:52:21:e9 -90  165     Y  -- WPA2(PSK/AES/AES)
@@ -15,3 +16,5 @@
                     ..WIFLY Free 00:24:6c:3d:58:61 -87  9       Y  -- NONE
                        FET Wi-Fi 00:24:6c:3d:58:64 -84  9       Y  -- NONE
              Starbucks_Free_WiFi 00:24:6c:3d:58:62 -84  9       Y  -- NONE
+
+/*** 以下是 window 抓出來的列表 ***/
